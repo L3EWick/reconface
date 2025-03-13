@@ -29,7 +29,9 @@ known_face_encodings, known_face_names, known_face_cpfs = load_face_data()
 
 def register_face(name, cpf):
     face_images = []
-    for i in range(50): 
+    max_images = 200  # Aumentado para 200 imagens
+
+    for i in range(max_images):
         ret, frame = video_capture.read()
         if ret:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -41,18 +43,21 @@ def register_face(name, cpf):
                     face_encoding = np.array(encoder.compute_face_descriptor(frame, shape))
                     face_images.append(face_encoding)
 
-                for face_encoding in face_images:
-                    known_face_encodings.append(face_encoding)
-                    known_face_names.append(f"{name}_{cpf}")
-                    known_face_cpfs.append(cpf)
+                print(f"Captura {i + 1}/{max_images} concluída...")  # Exibir progresso
 
-                save_face_data(known_face_encodings, known_face_names, known_face_cpfs)
-                messagebox.showinfo("Sucesso", f"Rosto de {name} registrado com sucesso!")
-                break
-            else:
-                messagebox.showwarning("Aviso", "Nenhum rosto detectado. Tente novamente.")
         else:
-            messagebox.showwarning("Erro", "Erro ao capturar a imagem. Tente novamente.")
+            print("Erro ao capturar a imagem. Tentando novamente...")
+
+    if face_images:
+        for face_encoding in face_images:
+            known_face_encodings.append(face_encoding)
+            known_face_names.append(f"{name}_{cpf}")
+            known_face_cpfs.append(cpf)
+
+        save_face_data(known_face_encodings, known_face_names, known_face_cpfs)
+        messagebox.showinfo("Sucesso", f"Rosto de {name} registrado com sucesso com {max_images} imagens!")
+    else:
+        messagebox.showwarning("Aviso", "Nenhum rosto detectado. Tente novamente.")
 
 def recognize_faces():
     frame_count = 0  
